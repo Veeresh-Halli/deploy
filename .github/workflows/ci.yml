@@ -1,0 +1,39 @@
+name: Django CI CD Deployment
+
+on:
+  push:
+    branches: [main]
+
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setuo Python
+      uses: actions/python@v4
+      with:
+        python-version: 3.11
+
+    - name: Install Dependencies
+      run: |
+        python -r requiremnets.txt
+
+    - name: Migrate
+      run: |
+        python manage.py migrate
+
+    - name: Run Tests
+      run: |
+        python manage.py test
+
+    - name: Trigger Deployment
+      if: success()
+      run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+
+  
